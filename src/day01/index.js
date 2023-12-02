@@ -37,7 +37,7 @@ function numberConvert(string) {
   return idx >= 0 ? idx + "" : string;
 }
 
-function findAndReplaceNums2(line) {
+function findAndReplaceNums(line) {
   const re = /(?=(\d|one|two|three|four|five|six|seven|eight|nine|zero))/g;
   const matches = line.matchAll(re);
   const outArr = [];
@@ -50,7 +50,7 @@ function findAndReplaceNums2(line) {
 const part2 = (rawInput) => {
   const input = parseInput(rawInput);
   let acc = 0;
-  input.forEach((line) => (acc += findAndReplaceNums2(line)));
+  input.forEach((line) => (acc += findAndReplaceNums(line)));
   return acc;
 };
 
