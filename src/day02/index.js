@@ -5,7 +5,7 @@ const parseInput = (rawInput) =>
 
 const getGameResults = (input) => {
   const output = { red: 0, green: 0, blue: 0 };
-  const results = input.matchAll(/((\d+) (red|green|blue))/gm);
+  const results = input.matchAll(/((\d+) (red|green|blue))/g);
   for (const result of results) {
     const [, , num, col] = result;
     if (parseInt(num) > output[col]) output[col] = parseInt(num);
@@ -20,22 +20,21 @@ const part1 = (rawInput) => {
     blue: 14,
   };
   const input = parseInput(rawInput);
-  const reduced = input.reduce((a, c) => {
-    const results = getGameResults(c);
+  return input.reduce((acc, curr, index) => {
+    const results = getGameResults(curr);
     let isFine = true;
     for (const colour in compare) {
       if (compare[colour] < results[colour]) isFine = false;
     }
-    return [...a, isFine];
-  }, []);
-  return reduced.reduce((a, c, i) => (a += c ? i + 1 : 0), 0);
+    return (acc += isFine ? index + 1 : 0);
+  }, 0);
 };
 
 const part2 = (rawInput) => {
   const input = parseInput(rawInput);
-  return input.reduce((a, c) => {
-    const { red, green, blue } = getGameResults(c);
-    return (a += red * green * blue);
+  return input.reduce((acc, curr) => {
+    const { red, green, blue } = getGameResults(curr);
+    return (acc += red * green * blue);
   }, 0);
 };
 

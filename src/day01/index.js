@@ -6,12 +6,12 @@ const part1 = (rawInput) => {
   const input = parseInput(rawInput);
   return input
     .map((l) =>
-      l.split("").reduce((a, c) => {
-        return parseInt(c) >= 0 ? [...a, c] : a;
+      l.split("").reduce((acc, curr) => {
+        return parseInt(curr) >= 0 ? [...acc, curr] : acc;
       }, []),
     )
-    .reduce((a, c) => {
-      return (a += parseInt(c[0] + c[c.length - 1]));
+    .reduce((acc, curr) => {
+      return (acc += parseInt(curr[0] + curr.at(-1)));
     }, 0);
 };
 
@@ -29,24 +29,24 @@ const numbers = [
 ];
 
 function numberConvert(string) {
-  const idx = numbers.indexOf(string);
-  return idx >= 0 ? idx + "" : string;
+  const index = numbers.indexOf(string);
+  return index >= 0 ? index + "" : string;
 }
 
 function findAndReplaceNums(line) {
   const matches = line.matchAll(
     /(?=(\d|one|two|three|four|five|six|seven|eight|nine|zero))/g,
   );
-  const outArr = [];
+  const outputArray = [];
   for (const match of matches) {
-    outArr.push(numberConvert(match[1]));
+    outputArray.push(numberConvert(match[1]));
   }
-  return parseInt(outArr[0] + outArr.at(-1));
+  return parseInt(outputArray[0] + outputArray.at(-1));
 }
 
 const part2 = (rawInput) => {
   const input = parseInput(rawInput);
-  return input.reduce((a, c) => (a += findAndReplaceNums(c)), 0);
+  return input.reduce((acc, curr) => (acc += findAndReplaceNums(curr)), 0);
 };
 
 run({
@@ -66,12 +66,12 @@ treb7uchet`,
     tests: [
       {
         input: `two1nine
-      eightwothree
-      abcone2threexyz
-      xtwone3four
-      4nineeightseven2
-      zoneight234
-      7pqrstsixteen`,
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen`,
         expected: 281,
       },
       {
