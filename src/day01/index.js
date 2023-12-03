@@ -4,19 +4,15 @@ const parseInput = (rawInput) => rawInput.split("\n").map((v) => v.trim());
 
 const part1 = (rawInput) => {
   const input = parseInput(rawInput);
-  const inputNums = input.map((l) =>
-    l.split("").reduce((a, c) => {
-      const num = parseInt(c);
-      if (num >= 0) {
-        return [...a, c];
-      } else {
-        return a;
-      }
-    }, []),
-  );
-  return inputNums.reduce((a, c) => {
-    return (a += parseInt(c[0] + c[c.length - 1]));
-  }, 0);
+  return input
+    .map((l) =>
+      l.split("").reduce((a, c) => {
+        return parseInt(c) >= 0 ? [...a, c] : a;
+      }, []),
+    )
+    .reduce((a, c) => {
+      return (a += parseInt(c[0] + c[c.length - 1]));
+    }, 0);
 };
 
 const numbers = [
@@ -38,20 +34,19 @@ function numberConvert(string) {
 }
 
 function findAndReplaceNums(line) {
-  const re = /(?=(\d|one|two|three|four|five|six|seven|eight|nine|zero))/g;
-  const matches = line.matchAll(re);
+  const matches = line.matchAll(
+    /(?=(\d|one|two|three|four|five|six|seven|eight|nine|zero))/g,
+  );
   const outArr = [];
   for (const match of matches) {
     outArr.push(numberConvert(match[1]));
   }
-  return parseInt(outArr[0] + outArr[outArr.length - 1]);
+  return parseInt(outArr[0] + outArr.at(-1));
 }
 
 const part2 = (rawInput) => {
   const input = parseInput(rawInput);
-  let acc = 0;
-  input.forEach((line) => (acc += findAndReplaceNums(line)));
-  return acc;
+  return input.reduce((a, c) => (a += findAndReplaceNums(c)), 0);
 };
 
 run({
