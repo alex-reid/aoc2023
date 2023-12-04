@@ -1,19 +1,18 @@
 import run from "aocrunner";
 
 const parseInput = (rawInput) =>
-  rawInput.split("\n").map((v) => {
-    const nums = v.split(":")[1];
-    return nums
+  rawInput.split("\n").map((v) =>
+    v
+      .split(":")[1]
       .split("|")
-      .map((v1) => v1.match(/\d+/g).map((v2) => parseInt(v2)));
-  });
+      .map((v1) => v1.match(/\d+/g).map((v2) => parseInt(v2))),
+  );
 
 const part1 = (rawInput) => {
   const input = parseInput(rawInput);
   let finalScore = 0;
 
-  input.forEach((row) => {
-    const [winning, mine] = row;
+  input.forEach(([winning, mine]) => {
     let score = 0.5;
     mine.forEach((number) => {
       if (winning.includes(number)) {
@@ -30,8 +29,7 @@ const part2 = (rawInput) => {
   const input = parseInput(rawInput);
   const cardScores = [];
 
-  input.forEach((row, index) => {
-    const [winning, mine] = row;
+  input.forEach(([winning, mine], index) => {
     const current = { winners: 0, index };
     mine.forEach((number) => {
       if (winning.includes(number)) {
@@ -41,11 +39,13 @@ const part2 = (rawInput) => {
     cardScores.push(current);
   });
 
-  function processCards(card) {
+  function processCards({ index, winners }, memo = []) {
+    if (memo[index]) return memo[index];
     let total = 1;
-    for (let i = card.index; i < card.index + card.winners; i++) {
-      total += processCards(cardScores[i + 1]);
+    for (let i = index; i < index + winners; i++) {
+      total += processCards(cardScores[i + 1], memo);
     }
+    memo[index] = total;
     return total;
   }
 
