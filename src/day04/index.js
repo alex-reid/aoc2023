@@ -13,8 +13,7 @@ const part1 = (rawInput) => {
   let finalScore = 0;
 
   input.forEach((row) => {
-    const winning = row[0];
-    const mine = row[1];
+    const [winning, mine] = row;
     let score = 0.5;
     mine.forEach((number) => {
       if (winning.includes(number)) {
@@ -33,10 +32,10 @@ const part2 = (rawInput) => {
 
   input.forEach((row, index) => {
     const [winning, mine] = row;
-    const current = { total: 0, index };
+    const current = { winners: 0, index };
     mine.forEach((number) => {
       if (winning.includes(number)) {
-        current.total += 1;
+        current.winners += 1;
       }
     });
     cardScores.push(current);
@@ -44,8 +43,8 @@ const part2 = (rawInput) => {
 
   function processCards(card) {
     let total = 1;
-    for (let i = card.index + 1; i < card.index + card.total + 1; i++) {
-      total += processCards(cardScores[i]);
+    for (let i = card.index; i < card.index + card.winners; i++) {
+      total += processCards(cardScores[i + 1]);
     }
     return total;
   }
