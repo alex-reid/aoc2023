@@ -16,18 +16,26 @@ const parseInput = (rawInput) => {
   return { seeds, ...maps };
 };
 
-const getRanges = (input, reverse = false) => {
+const getRanges = (input) => {
   const output = [];
   for (let j = 0; j < input.length; j++) {
     const [dest, source, range] = input[j];
-    if (reverse) {
-      output.push({ start: dest, end: dest + range, add: source - dest });
-    } else {
-      output.push({ start: source, end: source + range, add: dest - source });
-    }
+    output.push({ start: source, end: source + range, add: dest - source });
   }
   return output;
 };
+
+function buildSteps(input) {
+  return [
+    getRanges(input["seed-to-soil"]),
+    getRanges(input["soil-to-fertilizer"]),
+    getRanges(input["fertilizer-to-water"]),
+    getRanges(input["water-to-light"]),
+    getRanges(input["light-to-temperature"]),
+    getRanges(input["temperature-to-humidity"]),
+    getRanges(input["humidity-to-location"]),
+  ];
+}
 
 const getMapping = (input, ranges) => {
   let out = input;
@@ -41,38 +49,35 @@ const getMapping = (input, ranges) => {
 
 const part1 = (rawInput) => {
   const input = parseInput(rawInput);
-  const steps = [
-    getRanges(input["seed-to-soil"]),
-    getRanges(input["soil-to-fertilizer"]),
-    getRanges(input["fertilizer-to-water"]),
-    getRanges(input["water-to-light"]),
-    getRanges(input["light-to-temperature"]),
-    getRanges(input["temperature-to-humidity"]),
-    getRanges(input["humidity-to-location"]),
-  ];
-  // console.log(steps);
+  const steps = buildSteps(input);
 
-  const final = input.seeds.reduce((a, v, seedI) => {
-    let seed = v;
-    steps.forEach((step, index) => {
-      seed = getMapping(seed, step);
+  let smallest = Infinity;
+
+  input.seeds.forEach((v) => {
+    let input = v;
+    steps.forEach((step) => {
+      input = getMapping(input, step);
     });
-    return [...a, seed];
-  }, []);
+    if (input < smallest) smallest = input;
+  });
 
-  return final.sort((a, b) => a - b)[0];
+  return smallest;
 };
 
 const intersectAndRemaining = (obj1, obj2) => {
+  // create an intersection of two objects and return the remainder of object one as a new object
   const start = Math.max(obj1.start, obj2.start);
   const end = Math.min(obj1.end, obj2.end);
 
   const intersect = start <= end ? { start, end } : null;
 
   const remaining = [];
+
+  // add remainder if obj1 starts before obj2
   if (obj1.start < start) {
     remaining.push({ start: obj1.start, end: start });
   }
+  // add remainder if obj1 ends after obj2
   if (obj1.end > end) {
     remaining.push({ start: end, end: obj1.end });
   }
@@ -81,6 +86,7 @@ const intersectAndRemaining = (obj1, obj2) => {
 };
 
 const union = (obj1, obj2) => {
+  // create a union of two objects
   const start = Math.min(obj1.start, obj2.start);
   const end = Math.max(obj1.end, obj2.end);
   return { start, end };
@@ -112,87 +118,39 @@ const unionAll = (objects) => {
 
 const part2 = (rawInput) => {
   const input = parseInput(rawInput);
+
+  // build seed ranges
   const seeds = input.seeds.reduce((a, c, i) => {
     if (i % 2 == 0) return [...a, { start: c, end: c + input.seeds[i + 1] }];
     return a;
   }, []);
 
-  /*
+  const steps = buildSteps(input);
 
-  const steps = [
-    getRanges(input["seed-to-soil"]),
-    getRanges(input["soil-to-fertilizer"]),
-    getRanges(input["fertilizer-to-water"]),
-    getRanges(input["water-to-light"]),
-    getRanges(input["light-to-temperature"]),
-    getRanges(input["temperature-to-humidity"]),
-    getRanges(input["humidity-to-location"]),
-  ];
+  let inputs = seeds;
 
-
-  const test1 = [
-    { start: 69, end: 70, add: -69 },
-    { start: 0, end: 69, add: 1 },
-  ];
-
-  let sources = seeds;
-  //console.log(unionAll([...seeds, ...sources]));
   for (const step of steps) {
-    const nextInput = [];
-    step.forEach((step) => {
-      const newSources = [];
-      sources.forEach((source) => {
-        let intersect = intersectAndRemaining(source, step);
+    const outputs = [];
+    step.forEach((subStep) => {
+      const newInputs = [];
+      inputs.forEach((source) => {
+        let intersect = intersectAndRemaining(source, subStep);
         if (intersect.intersect) {
-          intersect.intersect.start += step.add;
-          intersect.intersect.end += step.add;
-          nextInput.push(intersect.intersect);
-          newSources.push(...intersect.remaining);
+          intersect.intersect.start += subStep.add;
+          intersect.intersect.end += subStep.add;
+          outputs.push(intersect.intersect);
+          newInputs.push(...intersect.remaining);
         } else {
-          newSources.push(source);
+          newInputs.push(source);
         }
       });
-      sources = newSources;
+      inputs = newInputs;
     });
-    nextInput.push(...sources);
-    sources = unionAll(nextInput);
-  }
-  console.log(sources);
-  return sources[0].start;
-  */
-
-  const isSeed = (input) => {
-    let out = false;
-    seeds.forEach(({ start, end }) => {
-      if (input >= start && input < end) {
-        out = true;
-      }
-    });
-    return out;
-  };
-
-  const steps = [
-    getRanges(input["humidity-to-location"], true),
-    getRanges(input["temperature-to-humidity"], true),
-    getRanges(input["light-to-temperature"], true),
-    getRanges(input["water-to-light"], true),
-    getRanges(input["fertilizer-to-water"], true),
-    getRanges(input["soil-to-fertilizer"], true),
-    getRanges(input["seed-to-soil"], true),
-  ];
-  console.log(steps);
-
-  let i = 0;
-  while (true) {
-    let final = i;
-    steps.forEach((step, index) => {
-      final = getMapping(final, step);
-    });
-    if (isSeed(final)) break;
-    i++;
+    outputs.push(...inputs);
+    inputs = unionAll(outputs);
   }
 
-  return i;
+  return inputs[0].start;
 };
 
 run({
