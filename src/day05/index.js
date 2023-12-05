@@ -64,22 +64,28 @@ const part1 = (rawInput) => {
   return smallest;
 };
 
-const intersectAndRemaining = (obj1, obj2) => {
+const getOutputMappings = (input, mapping) => {
   // create an intersection of two objects and return the remainder of object one as a new object
-  const start = Math.max(obj1.start, obj2.start);
-  const end = Math.min(obj1.end, obj2.end);
+  const start = Math.max(input.start, mapping.start);
+  const end = Math.min(input.end, mapping.end);
 
   const intersect = start <= end ? { start, end } : null;
 
   const remaining = [];
 
-  // add remainder if obj1 starts before obj2
-  if (obj1.start < start) {
-    remaining.push({ start: obj1.start, end: start });
+  // add remainder if input starts before mapping
+  if (input.start < start) {
+    remaining.push({ start: input.start, end: start });
   }
-  // add remainder if obj1 ends after obj2
-  if (obj1.end > end) {
-    remaining.push({ start: end, end: obj1.end });
+  // add remainder if input ends after mapping
+  if (input.end > end) {
+    remaining.push({ start: end, end: input.end });
+  }
+
+  // calculate the mapping of the input seed to the output for that step
+  if (intersect) {
+    intersect.start += mapping.add;
+    intersect.end += mapping.add;
   }
 
   return { intersect, remaining };
@@ -129,27 +135,30 @@ const part2 = (rawInput) => {
 
   let inputs = seeds;
 
+  // go through each step and generate an array of ranges to feed into the next step.
   for (const step of steps) {
-    const outputs = [];
-    step.forEach((subStep) => {
+    const stepMappings = [];
+    // go through each sub step and calculate the possible ranges
+    for (const subStep of step) {
       const newInputs = [];
-      inputs.forEach((source) => {
-        let intersect = intersectAndRemaining(source, subStep);
-        if (intersect.intersect) {
-          intersect.intersect.start += subStep.add;
-          intersect.intersect.end += subStep.add;
-          outputs.push(intersect.intersect);
-          newInputs.push(...intersect.remaining);
+      // get possible ranges from each input (seed)
+      for (const input of inputs) {
+        let { intersect, remaining } = getOutputMappings(input, subStep);
+        if (intersect) {
+          stepMappings.push(intersect);
+          newInputs.push(...remaining);
         } else {
-          newInputs.push(source);
+          newInputs.push(input);
         }
-      });
+      }
       inputs = newInputs;
-    });
-    outputs.push(...inputs);
-    inputs = unionAll(outputs);
+    }
+
+    // union all of the ranges to save redundant computation
+    inputs = unionAll([...stepMappings, ...inputs]);
   }
 
+  // as the unionAll function sorts before it unions, we can just pull the result from the inputs
   return inputs[0].start;
 };
 
