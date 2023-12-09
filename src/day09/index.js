@@ -8,8 +8,8 @@ const parseInput = (rawInput) =>
       .map((v2) => parseInt(v2)),
   );
 
-function getDifference(input, pt2, lastVal = []) {
-  lastVal.push(pt2 ? input[0] : input.at(-1));
+function getDifference(input, lastVal = []) {
+  lastVal.push(input.at(-1));
   if (new Set(input).size == 1) return lastVal;
 
   const output = [];
@@ -17,7 +17,7 @@ function getDifference(input, pt2, lastVal = []) {
     output.push(input[i + 1] - input[i]);
   }
 
-  return getDifference(output, pt2, lastVal);
+  return getDifference(output, lastVal);
 }
 
 const part1 = (rawInput) => {
@@ -29,16 +29,9 @@ const part1 = (rawInput) => {
 
 const part2 = (rawInput) => {
   const input = parseInput(rawInput);
-  const values = input.map((v) => getDifference(v, true));
-  const output = [];
-  values.forEach((value) => {
-    let iter = 0;
-    value.reverse().forEach((i) => {
-      iter = i - iter;
-    });
-    output.push(iter);
-  });
-  return output.reduce((a, c) => (a += c), 0);
+  const values = input.map((v) => getDifference(v.reverse()));
+  const predicted = values.map((v) => v.reduce((a, c) => (a += c), 0));
+  return predicted.reduce((a, c) => (a += c), 0);
 };
 
 run({
@@ -59,6 +52,12 @@ run({
   },
   part2: {
     tests: [
+      {
+        input: `0 3 6 9 12 15
+1 3 6 10 15 21
+10 13 16 21 30 45`,
+        expected: 2,
+      },
       {
         input: `0 3 6 9 12 15`,
         expected: -3,
