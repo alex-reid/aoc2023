@@ -22,16 +22,18 @@ function getDifference(input, lastVal = []) {
 
 const part1 = (rawInput) => {
   const input = parseInput(rawInput);
-  const values = input.map((v) => getDifference(v));
-  const predicted = values.map((v) => v.reduce((a, c) => (a += c), 0));
-  return predicted.reduce((a, c) => (a += c), 0);
+  return input
+    .map((v) => getDifference(v))
+    .map((v) => v.reduce((a, c) => (a += c), 0))
+    .reduce((a, c) => (a += c), 0);
 };
 
 const part2 = (rawInput) => {
   const input = parseInput(rawInput);
-  const values = input.map((v) => getDifference(v.reverse()));
-  const predicted = values.map((v) => v.reduce((a, c) => (a += c), 0));
-  return predicted.reduce((a, c) => (a += c), 0);
+  return input
+    .map((v) => getDifference(v.reverse()))
+    .map((v) => v.reduce((a, c) => (a += c), 0))
+    .reduce((a, c) => (a += c), 0);
 };
 
 run({
